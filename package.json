@@ -1,6 +1,6 @@
 {
   "name": "thing-it-device-hello-world",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "[thing-it-node] Device Plugin example.",
   "authors": "Klaus Berberich",
   "license": "MIT",

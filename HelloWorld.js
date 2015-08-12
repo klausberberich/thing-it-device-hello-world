@@ -70,6 +70,12 @@ module.exports = {
             type: {
                 id: "string"
             }
+        }, {
+            id: "loopInterval",
+            label: "Loop Interval",
+            type: {
+                id: "integer"
+            }
         }]
     },
 
@@ -123,7 +129,7 @@ function HelloWorldDiscovery() {
  * device class of the [thing-it-node] which will be pointed
  * out.
  */
-function HellowWorld() {
+function HelloWorld() {
 
     /**
      * This function is called on start of the device. Everyting starts here.
@@ -162,7 +168,8 @@ function HellowWorld() {
             // Loading these dependencies only in "real" mode makes the
             // simulation leaner and easier to run and test.
             if (!WorldConnectionAPI) {
-                WorldConnectionAPI = require("../WorldConnectionAPI");
+                WorldConnectionAPI = require("./lib/WorldConnectionAPI");
+                this.worldConnection = new WorldConnectionAPI();
             }
 
             // Scan for the presence of the device.
@@ -206,17 +213,17 @@ function HellowWorld() {
      * Simulation mode will allow to connect against any world.
      */
     HelloWorld.prototype.scan = function () {
-        this.logInfo("Scanning for World " + this.configuration.worldName + " started.");
+        this.logInfo("Scanning for world " + this.configuration.worldName + " started.");
 
         // Connect to a search API. In our simplified example
         // this API will call the callback once per world for
         // a total duration of up to 10 seconds with the earth values.
-        WorldConnectionAPI.searchWorlds(function (world) {
+        this.worldConnection.searchWorlds(function (world) {
             var deferred = q.defer();
 
             // Check whether the world found matches this device
-            if (world == this.configuration.worldName){
-                this.logInfo("Found matching world with name ", world.name, " and with ID ", word.id, ".");
+            if (world.name == this.configuration.worldName){
+                this.logInfo("Found matching world with name " + world.name + " and with ID " + world.id + ".");
                 this.world = world;
                 // If it is found, connect the device.
                 // This is another function that isn't required
@@ -224,7 +231,7 @@ function HellowWorld() {
                 this.connect();
             }
             else{
-                this.logInfo("Found non-matching world with name ", world.name, " and with ID ", word.id, ".");
+                this.logInfo("Ignoring non-matching world with name " + world.name + " and with ID " + world.id + ".");
             }
 
             deferred.resolve();
@@ -237,13 +244,24 @@ function HellowWorld() {
      *
      */
     HelloWorld.prototype.connect = function () {
+        var idAndName = this.world.id + ": " + this.world.name;
+
+        // State initialization on first contact with actual device
         this.state = {
-            aText: this.world.id + ": " + this.world.name,
-            anInteger: aText.length,
+            aText: idAndName,
+            anInteger: idAndName.length,
             looping: false
         };
 
+        // Register for events emitted by the device
+        this.worldConnection.registerForEvent(this.world, function (event){
+            this.logInfo("Captured an event! ", event);
+            this.logInfo(this.configuration.worldName + " is " + event.status + ".");
+            this.publishStateChange();
+        }.bind(this));
+
         this.sayHelloWorld();
+        this.startLoop();
     }
 
     /**
@@ -276,7 +294,7 @@ function HellowWorld() {
      * It's an inherited method from the device super
      * object.
      */
-    HelloWorld.prototype.sayHello = function(){
+    HelloWorld.prototype.sayHelloWorld = function(){
         this.aText = "Hello " + this.world.name;
         this.logInfo(this.aText);
         this.publishStateChange();
@@ -286,14 +304,23 @@ function HellowWorld() {
      *
      */
     HelloWorld.prototype.startLoop = function(){
-        //TODO
+        this.interval = setInterval(function (){
+            this.logInfo("Loop executed for world " + this.configuration.worldName);
+            this.publishStateChange();
+        }.bind(this), this.configuration.loopInterval);
+        this.state.looping = true;
+        this.logInfo("Loop started for world " + this.configuration.worldName);
+        this.publishStateChange();
     }
 
     /**
      *
      */
     HelloWorld.prototype.stopLoop = function(){
-        //TODO
+        clearInterval(this.interval);
+        this.state.looping = false;
+        this.logInfo("Loop stopped for world " + this.configuration.worldName);
+        this.publishStateChange();
     }
 
     /**
