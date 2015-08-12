@@ -34,8 +34,8 @@ module.exports = {
                 id: "integer"
             }
         }, {
-            id: "aBoolean",
-            label: "Boolean",
+            id: "looping",
+            label: "Looping",
             type: {
                 id: "boolean"
             }
@@ -144,7 +144,7 @@ function HellowWorld() {
         this.state = {
             aText: null,
             anInteger: 0,
-            aBoolean: false
+            looping: false
         };
 
         this.logDebug("Hello World state: " + JSON.stringify(this.state));
@@ -240,32 +240,60 @@ function HellowWorld() {
         this.state = {
             aText: this.world.id + ": " + this.world.name,
             anInteger: aText.length,
-            aBoolean: (this.world.name == "Earth")
+            looping: false
         };
 
         this.sayHelloWorld();
     }
 
     /**
-     *
+     * Use of this.publishStateChange will push the change
+     * to aText up to any UI using this value.
+     * It's an inherited method from the device super
+     * object.
      */
     HelloWorld.prototype.sayHello = function(){
         this.aText = "Hello";
+        this.logInfo(this.aText);
+        this.publishStateChange();
     }
 
     /**
-     *
+     * Use of this.publishStateChange will push the change
+     * to aText up to any UI using this value.
+     * It's an inherited method from the device super
+     * object.
      */
     HelloWorld.prototype.sayWorld = function(){
         this.aText = this.world.name;
+        this.logInfo(this.aText);
+        this.publishStateChange();
     }
 
     /**
-     *
+     * Use of this.publishStateChange will push the change
+     * to aText up to any UI using this value.
+     * It's an inherited method from the device super
+     * object.
      */
     HelloWorld.prototype.sayHello = function(){
         this.aText = "Hello " + this.world.name;
         this.logInfo(this.aText);
+        this.publishStateChange();
+    }
+
+    /**
+     *
+     */
+    HelloWorld.prototype.startLoop = function(){
+        //TODO
+    }
+
+    /**
+     *
+     */
+    HelloWorld.prototype.stopLoop = function(){
+        //TODO
     }
 
     /**
