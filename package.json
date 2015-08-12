@@ -1,0 +1,23 @@
+{
+  "name": "thing-it-device-hello-world",
+  "version": "0.1.0",
+  "description": "[thing-it-node] Device Plugin example.",
+  "authors": "Klaus Berberich",
+  "license": "MIT",
+  "keywords": [
+    "IoT",
+    "thing-it",
+    "SmartHome",
+    "Entertainment",
+    "Music",
+    "Universal Remote",
+    "Health"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/klausberberich/thing-it-device-hello-world"
+  },
+  "dependencies": {
+    "q": "^1.4.1"
+  }
+}
