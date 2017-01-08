@@ -3,7 +3,8 @@
  * the first couple before state are mandatory for the device.
  *
  * State will be shown in many default screens and can very easily
- * be accessed in the HTML UI and other places.
+ * be accessed in the HTML UI and other places. Any state variable can
+ * also be used in rules and charts.
  *
  * Services will be exposed in UIs as invocable by the user
  * and they will be exposed for orchestration.
@@ -80,9 +81,9 @@ module.exports = {
     },
 
     /**
-     * Invoked during start up to create the instance of 
+     * Invoked during start up to create the instance of
      * HelloWorld for this specific device.
-     * 
+     *
      */
     create: function (device) {
         return new HelloWorld();
@@ -91,7 +92,7 @@ module.exports = {
     /**
      * Discovery is an advanced function we don't need
      * for our Hello World example.
-     *  
+     *
      */
     discovery: function (options) {
         var discovery = new HelloWorldDiscovery();
@@ -104,8 +105,10 @@ var q = require('q');
 var WorldConnectionAPI;
 
 /**
- * Discovery is an advanced function we don't need
- * for our Hello World example.
+ * Discovery is an advanced function we are not using
+ * for our Hello World example. In general, this is where code
+ * is written that detects devices and then advocates discovered
+ * devices to thing-it-node.
  *
  */
 function HelloWorldDiscovery() {
@@ -137,10 +140,10 @@ function HelloWorld() {
      * do what you want.
      *
      * Typical tasks performed here are:
-     * - Initializing state values
-     * - Scanning for a device
-     * - Initializing simulation mode
      * - Loading dependencies
+     * - Initializing state values
+     * - Trying to connect to a device
+     * - Initializing simulation mode
      *
      */
     HelloWorld.prototype.start = function () {
@@ -153,6 +156,7 @@ function HelloWorld() {
             looping: false
         };
 
+        // This class inherits logDebug, logError, and logInfo methods that should be used rather than console.log
         this.logDebug("Hello World state: " + JSON.stringify(this.state));
 
 
@@ -216,13 +220,11 @@ function HelloWorld() {
         this.logInfo("Scanning for world " + this.configuration.worldName + " started.");
 
         // Connect to a search API. In our simplified example
-        // this API will call the callback once per world for
-        // a total duration of up to 10 seconds with the earth values.
+        // the search API will call the callback for each world it finds.
         this.worldConnection.searchWorlds(function (world) {
-            var deferred = q.defer();
 
             // Check whether the world found matches this device
-            if (world.name == this.configuration.worldName){
+            if (world.name == this.configuration.worldName) {
                 this.logInfo("Found matching world with name " + world.name + " and with ID " + world.id + ".");
                 this.world = world;
                 // If it is found, connect the device.
@@ -230,12 +232,10 @@ function HelloWorld() {
                 // but commonly used.
                 this.connect();
             }
-            else{
+            else {
                 this.logInfo("Ignoring non-matching world with name " + world.name + " and with ID " + world.id + ".");
             }
 
-            deferred.resolve();
-            return deferred.promise;
         }.bind(this));
     };
 
@@ -254,7 +254,7 @@ function HelloWorld() {
         };
 
         // Register for events emitted by the device
-        this.worldConnection.registerForEvent(this.world, function (event){
+        this.worldConnection.registerForEvent(this.world, function (event) {
             this.logInfo("Captured an event! ", event);
             this.logInfo(this.configuration.worldName + " is " + event.status + ".");
             this.publishStateChange();
@@ -270,7 +270,7 @@ function HelloWorld() {
      * It's an inherited method from the device super
      * object.
      */
-    HelloWorld.prototype.sayHello = function(){
+    HelloWorld.prototype.sayHello = function () {
         this.aText = "Hello";
         this.logInfo(this.aText);
         this.publishStateChange();
@@ -282,7 +282,7 @@ function HelloWorld() {
      * It's an inherited method from the device super
      * object.
      */
-    HelloWorld.prototype.sayWorld = function(){
+    HelloWorld.prototype.sayWorld = function () {
         this.aText = this.world.name;
         this.logInfo(this.aText);
         this.publishStateChange();
@@ -294,7 +294,7 @@ function HelloWorld() {
      * It's an inherited method from the device super
      * object.
      */
-    HelloWorld.prototype.sayHelloWorld = function(){
+    HelloWorld.prototype.sayHelloWorld = function () {
         this.aText = "Hello " + this.world.name;
         this.logInfo(this.aText);
         this.publishStateChange();
@@ -303,8 +303,8 @@ function HelloWorld() {
     /**
      *
      */
-    HelloWorld.prototype.startLoop = function(){
-        this.interval = setInterval(function (){
+    HelloWorld.prototype.startLoop = function () {
+        this.interval = setInterval(function () {
             this.logInfo("Loop executed for world " + this.configuration.worldName);
             this.publishStateChange();
         }.bind(this), this.configuration.loopInterval);
@@ -316,7 +316,7 @@ function HelloWorld() {
     /**
      *
      */
-    HelloWorld.prototype.stopLoop = function(){
+    HelloWorld.prototype.stopLoop = function () {
         clearInterval(this.interval);
         this.state.looping = false;
         this.logInfo("Loop stopped for world " + this.configuration.worldName);
@@ -344,7 +344,7 @@ function HelloWorld() {
      *
      *
      */
-    HelloWorld.prototype.initiateSimulation = function(){
+    HelloWorld.prototype.initiateSimulation = function () {
     }
 
 }
