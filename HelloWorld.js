@@ -149,6 +149,12 @@ function HelloWorld() {
     HelloWorld.prototype.start = function () {
         var deferred = q.defer();
 
+        this.operationalState = {
+            status: 'PENDING',
+            message: 'Waiting for initialization...'
+        };
+        this.publishOperationalStateChange();
+
         // Initialize state values
         this.state = {
             aText: null,
@@ -181,9 +187,23 @@ function HelloWorld() {
             // you're on your own with how you'd like your device to operate
             // Check many of the code examples in other plugins.
             this.scan();
+
+            this.operationalState = {
+                status: 'OK',
+                message: 'Hello World successfully initialized'
+            }
+            this.publishOperationalStateChange();
+
             deferred.resolve();
         } else {
             this.logInfo("Starting up simulated HelloWorld.");
+
+            this.operationalState = {
+                status: 'OK',
+                message: 'Hello World successfully initialized'
+            }
+            this.publishOperationalStateChange();
+
             deferred.resolve();
 
             // If in simulation mode, start up the device as such.
